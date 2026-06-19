@@ -1,0 +1,62 @@
+import speech_recognition as sr
+import pyttsx3
+from google import genai
+
+# 1. Initialize the Voice Engine (Speaking)
+engine = pyttsx3.init()
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[0].id) # 0 is usually male, 1 is female
+
+def speak(text):
+    print(f"Jarvis: {text}")
+    engine.say(text)
+    engine.runAndWait()
+
+# 2. Initialize the AI Brain (Thinking)
+# Make sure you have your Gemini API key set up in your environment variables
+client = genai.Client()
+
+def ask_jarvis(user_input):
+    # We give it a system instruction so it acts like Jarvis
+    response = client.models.generate_content(
+        model='gemini-2.5-flash',
+        contents=user_input,
+        config=genai.types.GenerateContentConfig(
+            system_instruction="You are JARVIS, the AI assistant created by Tony Stark. Be polite, highly intelligent, slightly witty, and address the user as 'Sir' or 'Boss'."
+        )
+    )
+    return response.text
+
+# 3. Initialize the Microphone (Listening)
+def listen():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("\nListening...")
+        recognizer.pause_threshold = 1
+        audio = recognizer.listen(source)
+    try:
+        print("Recognizing...")
+        query = recognizer.recognize_google(audio, language='en-in')
+        print(f"You said: {query}\n")
+        return query
+    except Exception as e:
+        print("Say that again please...")
+        return "None"
+
+# --- MAIN LOOP ---
+if __name__ == "__main__":
+    speak("Jarvis system is online. Ready when you are, Sir.")
+    
+    while True:
+        query = listen().lower()
+        
+        if 'none' in query:
+            continue
+            
+        if 'goodbye jarvis' in query or 'exit' in query:
+            speak("Shutting down systems. Goodbye, Sir.")
+            break
+            
+        # Get response from the AI brain and speak it
+        reply = ask_jarvis(query)
+        speak(reply)
