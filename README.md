@@ -18,6 +18,7 @@ jarvis-ai-assistant/
 ├── jarvis.py
 ├── jarvis ai.txt
 └── README.md
+   requirements.txt
 ```
 
 ## Requirements
